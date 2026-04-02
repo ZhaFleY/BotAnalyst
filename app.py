@@ -5,7 +5,7 @@ from aiogram.filters.command import Command
 import os
 from handlers import start
 from dotenv import load_dotenv
-
+from keyboards.start_menu import build_start_menu
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 

@@ -1,0 +1,23 @@
+{
+  "start_menu": {
+    "title": "Добро Пожаловать!",
+    "upload_data": {
+      "name": "Загрузить файл",
+      "callback": "upload_cb"
+    },
+    "settings": {
+      "name": "Настройка",
+      "callback": "settings_cb"
+    }
+
+
+  }
+
+
+
+
+
+
+
+
+}
