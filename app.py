@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 import os
-from handlers import start
+from handlers import start,file_uploader,profile_settings
 from dotenv import load_dotenv
 from keyboards.start_menu import build_start_menu
 load_dotenv()
@@ -21,7 +21,7 @@ print(TOKEN)
 async def main():
     bot = Bot(TOKEN)
     dp = Dispatcher()
-    dp.include_routers(start.router)
+    dp.include_routers(file_uploader.router,start.router,profile_settings.router)
 
 
     await dp.start_polling(bot)
