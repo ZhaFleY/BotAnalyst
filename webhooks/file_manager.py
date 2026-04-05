@@ -9,9 +9,7 @@ def send_to_agent(path):
     processor = FileProcessor(path)
     data, meta,flag = processor.process()
 
-    if data:
-        print(f"тесты пройдены {data},{meta},{flag}")
-    return  None
+    print(data, meta, flag)
 
 
 

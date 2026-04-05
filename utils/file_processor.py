@@ -1,3 +1,4 @@
+import pyreadstat
 from aiogram.fsm.state import StatesGroup
 import pandas as pd
 import requests
@@ -9,33 +10,35 @@ class FileProcessor:
 
     def process(self):
 
-        dataset = None
-        meta = None
-        flag = None
+        document = self.document
+        format = document.split(".")[-1]
+        print(f"format - {format}")
 
-        try:
-            dataset = pd.read_csv(self.document)
-            flag = "csv"
-            return dataset, meta, flag
-        except:
-            pass
-        try:
-            dataset = pd.read_excel(self.document)
-            flag = "excel"
-            return dataset, meta, flag
 
-        except: pass
 
-        try:
-            dataset,meta = ps.read_sav(self.document)
-            flag = "sav"
-            return dataset,meta,flag
-        except:
-            pass
+        match format:
 
-        finally:
-            print('ERROR')
-            pass
+            case "csv":
+                dataset = pd.read_csv(document)
+                flag = "csv"
+                return dataset,None,flag
+            case "xlsx":
+                dataset = pd.read_excel(document)
+                flag = "xlsx"
+                return dataset,None,flag
+            case "sav":
+                dataset,meta = pyreadstat.read_sav(document)
+                flag = "sav"
+                return dataset,meta,flag
+
+
+
+
+
+
+
+
+
 
 
 
