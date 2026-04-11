@@ -1,9 +1,11 @@
 import uvicorn
 from fastapi import FastAPI,Depends
 
-
+from backend.routers import file_router
 
 app = FastAPI()
+
+app.include_router(file_router.router)
 
 @app.get("/")
 def main():

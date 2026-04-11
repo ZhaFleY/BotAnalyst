@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 from utils.logger import logger
 import pyreadstat as ps
-class FileProcessor:
+class FileDetection:
     def __init__(self, document):
         self.document = document
 
@@ -30,19 +30,3 @@ class FileProcessor:
                 dataset,meta = pyreadstat.read_sav(document)
                 flag = "sav"
                 return dataset,meta,flag
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

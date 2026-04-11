@@ -1,0 +1,35 @@
+services:
+
+  api:
+    container_name: api-container
+    build: .
+    command: uvicorn backend.app:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    restart: always
+
+  celery_worker:
+    container_name: celery-worker
+    build: .
+    command: python -m celery -A backend.celery_app worker --loglevel=info
+    depends_on:
+      - redis
+    restart: always
+
+  telegram_bot:
+    container_name: tgbot
+    build: .
+    command: python app.py
+    depends_on:
+      - api
+      - redis
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always

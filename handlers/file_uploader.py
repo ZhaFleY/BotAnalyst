@@ -1,9 +1,10 @@
 import aiogram
 from aiogram import Router,F,types
-import requests
 from aiogram.fsm.context import FSMContext
-from webhooks.file_manager import send_to_agent
+from utils.file_type_detector import FileDetection
 from utils.logger import logger
+import requests
+from requests import Request
 
 from FSM.ulpload_file_fsm import UploadFileFSM
 router = Router()
@@ -26,12 +27,25 @@ async def file_cb(message: types.Message, state: FSMContext):
     try:
 
         await message.bot.download(doc, destination=path)
-
+        with open(path, "rb") as f:
+            response = requests.post(
+                "http://api:8000/api/process_file",
+                data={"chat_id": message.chat.id},
+                files={"file": f}
+            )
         await msg.edit_text("Обработка...")
+        if response.status_code == 200:
+            await msg.edit_text("Готово")
+        else:
+            await msg.edit_text(f"ОШИБКА ГЕББЕЛЬСА {response.status_code},{response.text}")
 
-        res = send_to_agent(path)
 
-        await msg.edit_text("Готово")
+
+
+
+
+
+
 
     except Exception as e:
         await msg.edit_text(f"ошибка - {e}")
