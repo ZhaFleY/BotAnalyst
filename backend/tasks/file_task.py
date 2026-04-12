@@ -1,10 +1,12 @@
 from backend.celery_app import celery
 import magic
-from backend.utils.tgutils import send_message
+from backend.utils.tgutils import send_message,send_document
 import polars as pl
 import pyreadstat
-import mimetypes
+from backend.utils.data_processing import extract_useful_data,do_pdf_report
+from backend.utils.logger import logger
 import os
+from backend.ai.agent import do_forecast
 from backend.s3.core_db import client
 @celery.task
 def detect_type(file_path, chat_id):
@@ -57,21 +59,7 @@ def parse_csv(file_path,chat_id):
 
 @celery.task
 def parse_xlsx(object_name, chat_id):
-    local_path = f"/tmp/{object_name}"
-
-
-
-    client.fget_object(
-        "files",
-        object_name,
-        local_path
-    )
-
-    df = pl.read_excel(local_path)
-    preview = df.head(5).to_dicts()
-    text = "\n".join(str(r) for r in preview)
-
-    send_message(chat_id, text)
+    pass
 
 
 @celery.task
@@ -80,6 +68,42 @@ def parse_sav(file_path,chat_id):
     df = df.drop_nulls()
     df = df.fill_null(0)
     send_message(df.head(5), chat_id)
+
+
+
+@celery.task
+def process_xlsx_csv(df: pl.DataFrame):
+    df = df.drop_nulls()
+    df = df.fill_null(0)
+
+    return df
+
+@celery.task
+def process_sav(objectname,chat_id):
+    df, meta = pyreadstat.read_sav(objectname)
+    labels = meta.variable_value_labels
+
+    for col, mapping in labels.items():
+        if col in df.columns:
+            df[col] = df[col].map(mapping)
+    df = df.drop_nulls()
+    df = df.fill_null(0)
+
+
+    agent_res = do_forecast(df.to_dict(orient="records"))
+    logger.info("Бот дал ответ")
+
+    pdf_path = do_pdf_report(agent_res)
+    logger.info("Отчёт собран")
+    send_document(chat_id, pdf_path)
+    logger.info("Отчёт ушёл на сервер")
+
+
+
+
+
+
+
 
 
 

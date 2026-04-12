@@ -22,3 +22,14 @@ def send_message(chat_id, text):
     )
 
     print("TG RESPONSE:", r.status_code, r.text)
+
+
+def send_document(chat_id: int, file_path: str):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+
+    with open(file_path, "rb") as f:
+        requests.post(
+            url,
+            data={"chat_id": chat_id},
+            files={"document": f}
+        )
