@@ -1,0 +1,9 @@
+from backend.s3.core_db import client
+
+BUCKET_NAME = "files"
+
+def init_bucket():
+    found = client.bucket_exists(BUCKET_NAME)
+
+    if not found:
+        client.make_bucket(BUCKET_NAME)
