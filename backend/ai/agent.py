@@ -49,7 +49,13 @@ agent = create_agent(model,tools = [built_chart,do_summary],checkpointer= checkp
 
 
 
-def do_forecast(config:dict):
+def do_forecast(config:dict,chat_id:int):
+    config = {
+        "configurable": {
+            "thread_id": str(chat_id)
+        }
+    }
+
     result = agent.invoke(input=json.dumps(config))
 
 

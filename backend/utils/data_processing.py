@@ -2,6 +2,9 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Image, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from matplotlib import pyplot as plt
 import uuid
+import zipfile
+from io import BytesIO
+import os
 def extract_useful_data(df):
     """
     Подготавливает данные для агента
@@ -53,3 +56,16 @@ def do_pdf_report(report:dict):
     doc.build(content)
 
     return path
+def extract_zip(tmp_zip_path: str) -> str:
+    extract_dir = f"/tmp/{uuid.uuid4()}"
+    os.makedirs(extract_dir, exist_ok=True)
+
+    with zipfile.ZipFile(tmp_zip_path, "r") as z:
+        z.extractall(extract_dir)
+
+    # берем первый файл внутри
+    files = os.listdir(extract_dir)
+    if not files:
+        raise ValueError("Zip пустой")
+
+    return os.path.join(extract_dir, files[0])

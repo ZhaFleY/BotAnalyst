@@ -40,7 +40,7 @@ def routers(payload):
         return parse_xlsx.delay(filepath, chat_id)
 
     elif file_type == "spss":
-        return parse_sav.delay(filepath, chat_id)
+        return process_sav.delay(filepath, chat_id)
 
     else:
         raise ValueError("Неподходящий формат файла")
@@ -62,12 +62,6 @@ def parse_xlsx(object_name, chat_id):
     pass
 
 
-@celery.task
-def parse_sav(file_path,chat_id):
-    df,meta = pyreadstat.read_sav(file_path)
-    df = df.drop_nulls()
-    df = df.fill_null(0)
-    send_message(df.head(5), chat_id)
 
 
 
@@ -79,24 +73,48 @@ def process_xlsx_csv(df: pl.DataFrame):
     return df
 
 @celery.task
-def process_sav(objectname,chat_id):
-    df, meta = pyreadstat.read_sav(objectname)
-    labels = meta.variable_value_labels
+def process_sav(objectname, chat_id):
 
-    for col, mapping in labels.items():
-        if col in df.columns:
-            df[col] = df[col].map(mapping)
-    df = df.drop_nulls()
-    df = df.fill_null(0)
+    try:
+        local_path = f"/tmp/{objectname}"
+        print(f"LOCAL PATH: {local_path}")
 
 
-    agent_res = do_forecast(df.to_dict(orient="records"))
-    logger.info("Бот дал ответ")
+        print(f"EXISTS: {os.path.exists(local_path)}")
+        print(f"SIZE: {os.path.getsize(local_path) if os.path.exists(local_path) else 'NO FILE'}")
 
-    pdf_path = do_pdf_report(agent_res)
-    logger.info("Отчёт собран")
-    send_document(chat_id, pdf_path)
-    logger.info("Отчёт ушёл на сервер")
+
+        client.fget_object(
+            "files",
+            objectname,
+            local_path
+        )
+
+
+        df, meta = pyreadstat.read_sav(local_path)
+
+        labels = meta.variable_value_labels
+
+        for col, mapping in labels.items():
+            if col in df.columns:
+                df[col] = df[col].map(mapping)
+
+        df = df.astype(str)
+        agent_res = do_forecast(df.to_dict(orient="records"),chat_id)
+
+        logger.info("Бот дал ответ")
+
+        pdf_path = do_pdf_report(agent_res)
+
+        logger.info("Отчёт собран")
+
+
+        send_document(chat_id, pdf_path)
+
+        logger.info("Отчёт ушёл на сервер")
+
+    except Exception as e:
+        logger.error(f"Ошибка обработки SAV {e}")
 
 
 
