@@ -80,8 +80,7 @@ def process_sav(objectname, chat_id):
         print(f"LOCAL PATH: {local_path}")
 
 
-        print(f"EXISTS: {os.path.exists(local_path)}")
-        print(f"SIZE: {os.path.getsize(local_path) if os.path.exists(local_path) else 'NO FILE'}")
+
 
 
         client.fget_object(
@@ -93,20 +92,25 @@ def process_sav(objectname, chat_id):
 
         df, meta = pyreadstat.read_sav(local_path)
 
-        labels = meta.variable_value_labels
 
+        labels = meta.variable_value_labels
         for col, mapping in labels.items():
             if col in df.columns:
                 df[col] = df[col].map(mapping)
 
-        df = df.astype(str)
-        agent_res = do_forecast(df.to_dict(orient="records"),chat_id)
 
-        logger.info("Бот дал ответ")
+
+        df = df.astype(str)
+        print(111111)
+        df = df[:-1]
+        agent_res = do_forecast(df.to_dict(orient="records"),chat_id)
+        print(2222222)
+
+        print("Бот дал ответ")
 
         pdf_path = do_pdf_report(agent_res)
 
-        logger.info("Отчёт собран")
+
 
 
         send_document(chat_id, pdf_path)

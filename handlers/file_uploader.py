@@ -39,14 +39,6 @@ async def file_cb(message: types.Message, state: FSMContext):
         else:
             await msg.edit_text(f"ОШИБКА ГЕББЕЛЬСА {response.status_code},{response.text}")
 
-
-
-
-
-
-
-
-
     except Exception as e:
         await msg.edit_text(f"ошибка - {e}")
 

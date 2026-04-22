@@ -3,23 +3,48 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from backend.ai.tools import *
 from langgraph.checkpoint.memory import InMemorySaver
-from langchain.agents.structured_output import ToolStrategy
-from langchain_google_genai import ChatGoogleGenerativeAI
+
 from dotenv import load_dotenv
 import os
 import json
-
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from backend.ai.tools.agent_tool import built_chart,do_summary
+from transformers import pipeline
+from langchain_huggingface import HuggingFacePipeline
+
+
 
 load_dotenv()
-model = ChatGoogleGenerativeAI(
-    model = "gemini-3-flash-preview",
-    google_api_key= os.getenv("API-KEY"),
-    temperature=0.7
-)
+
+
+
+
+model = None
+agent = None
+
+
+def get_agent():
+    global model, agent
+
+    if agent is None:
+        pipe = pipeline("text-generation",model="mistralai/Mistral-7B-Instruct-v0.3",
+    device_map="auto")
+        model = HuggingFacePipeline(pipeline=pipe)
+
+        agent = create_agent(
+            model,
+            tools=[built_chart, do_summary],
+            checkpointer=checkpointer,
+            system_prompt=PROMPT
+        )
+
+    return agent
+
+
 checkpointer = InMemorySaver()
 
 PROMPT = """
+<s>[INST]
 Ты элитный аналитик тебе на вход падает фрагмент данных из 
 опроса респондентов,сделай статистику их отетов.
 1.Выяви аномалии или неточности
@@ -42,21 +67,40 @@ PROMPT = """
   "anomalies": [],
   "verdict": "..."
 }
+<s>[INST]
 """
 
 
-agent = create_agent(model,tools = [built_chart,do_summary],checkpointer= checkpointer,system_prompt=PROMPT)
 
 
 
-def do_forecast(config:dict,chat_id:int):
-    config = {
+
+def do_forecast(config,chat_id:int):
+    agent = get_agent()
+
+
+    configs = {
         "configurable": {
             "thread_id": str(chat_id)
         }
     }
+    print(f"конфиг собран")
 
-    result = agent.invoke(input=json.dumps(config))
+    result = agent.invoke(
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": json.dumps(config, ensure_ascii=False)
+                }
+            ]
+        },
+        config=configs
+    )
+
+
+    print("Готово")
+    return result
 
 
 
