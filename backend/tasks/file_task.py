@@ -3,11 +3,12 @@ import magic
 from backend.utils.tgutils import send_message,send_document
 import polars as pl
 import pyreadstat
-from backend.utils.data_processing import extract_useful_data,do_pdf_report
+from backend.utils.data_processing import extract_useful_data,do_pdf_report,prepare_text
 from backend.utils.logger import logger
 import os
 from backend.ai.agent import do_forecast
 from backend.s3.core_db import client
+import traceback
 @celery.task
 def detect_type(file_path, chat_id):
     ext = os.path.splitext(file_path)[1].lower()
@@ -102,23 +103,30 @@ def process_sav(objectname, chat_id):
 
         df = df.astype(str)
         print(111111)
-        df = df[:-1]
-        agent_res = do_forecast(df.to_dict(orient="records"),chat_id)
+        df = pl.DataFrame({
+            "names":["Drake",'Kira','Anna'],
+            "age": [33,20,18],
+            "salary":[6000,1000,800]
+        })
+        agent_res = do_forecast(df.to_dicts(),chat_id)
         print(2222222)
 
         print("Бот дал ответ")
+        print(agent_res)
 
-        pdf_path = do_pdf_report(agent_res)
+        # pdf_path = do_pdf_report(agent_res)
+        text = prepare_text(agent_res)
+        send_message(chat_id,text)
 
 
 
 
-        send_document(chat_id, pdf_path)
+
 
         logger.info("Отчёт ушёл на сервер")
 
     except Exception as e:
-        logger.error(f"Ошибка обработки SAV {e}")
+        logger.error(f"Ошибка обработки SAV {traceback.format_exc()}")
 
 
 

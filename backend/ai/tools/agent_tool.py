@@ -2,16 +2,6 @@ from langchain.tools import tool, ToolRuntime
 import matplotlib.pyplot as plt
 
 
-@tool
-def built_chart(spec: dict) -> dict:
-    """
-    Проверяет и нормализует структуру графика
-    """
-    return {
-        "type": spec["type"],
-        "x": spec["x"],
-        "y": spec["y"]
-    }
 
 
 @tool

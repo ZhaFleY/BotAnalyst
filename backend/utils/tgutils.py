@@ -33,3 +33,4 @@ def send_document(chat_id: int, file_path: str):
             data={"chat_id": chat_id},
             files={"document": f}
         )
+

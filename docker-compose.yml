@@ -9,6 +9,12 @@ services:
     depends_on:
       - redis
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 
   celery_worker:
     container_name: celery-worker
@@ -17,6 +23,11 @@ services:
     depends_on:
       - redis
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   telegram_bot:
     container_name: tgbot
@@ -26,6 +37,11 @@ services:
       - api
       - redis
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7
@@ -33,6 +49,11 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 
   minio:
@@ -44,3 +65,9 @@ services:
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
