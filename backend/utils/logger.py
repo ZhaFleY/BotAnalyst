@@ -1,5 +1,4 @@
-import logging
+from backend.shared.logging import logger
 
+__all__ = ["logger"]
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("celery")

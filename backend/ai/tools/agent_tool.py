@@ -1,18 +1,4 @@
-from langchain.tools import tool, ToolRuntime
-import matplotlib.pyplot as plt
+from backend.modules.analysis.infrastructure.llm.tools.summary_tool import do_summary
 
+__all__ = ["do_summary"]
 
-
-
-@tool
-def do_summary(data: dict) -> str:
-    """
-    Генерация текста анализа (или подготовка)
-    """
-
-    return f"""
-    Анализ данных:
-    - выявлены тренды: ...
-    - аномалии: ...
-    - вывод: ...
-    """

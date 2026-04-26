@@ -1,15 +1,4 @@
-from celery import Celery
-from backend.ai.agent import get_agent
-celery = Celery(
-    "bot",
-    broker="redis://redis:6379/0",
-    backend="redis://redis:6379/1",
-    include=["backend.tasks.file_task"]
-)
+from backend.entrypoints.celery_worker import celery
 
-from celery.signals import worker_ready
+__all__ = ["celery"]
 
-@worker_ready.connect
-def warmup_model(**kwargs):
-    print("🔥 Warming up model...")
-    get_agent()
