@@ -1,0 +1,7 @@
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app")
+
+__all__ = ["logger"]
+

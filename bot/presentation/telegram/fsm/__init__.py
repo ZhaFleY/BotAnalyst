@@ -1,0 +1,2 @@
+"""Aiogram FSM states."""
+
